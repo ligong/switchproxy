@@ -22,12 +22,17 @@ proxy = (enable, conf, cb) ->
       alert "[WARN]: SOCKS5 proxy is not configured yet. \n\nPlease configure and save it."
     config = {mode: "direct"}
     chrome.proxy.settings.set {value:config, scope:'regular'}, -> cb null
+
   
-switch_proxy = () ->
+switch_proxy = (action) ->
   
   chrome.storage.local.get ["enabled","fixed_servers"], (data)->
+
+    unless "enabled" of data
+      data.enabled = false
   
-    data.enabled = not data.enabled
+    if action
+      data.enabled = not data.enabled
 
     proxy data.enabled, data.fixed_servers, (enabled) ->
       data.enabled = enabled
@@ -43,8 +48,12 @@ display_status = ()->
 chrome.runtime.onStartup.addListener(display_status)
 chrome.runtime.onInstalled.addListener(display_status)
 chrome.browserAction.onClicked.addListener(switch_proxy)
-  
-      
+chrome.runtime.onMessage.addListener (request,sender,sendResponse) ->
+  if (request && (request.id == "refresh"))
+    switch_proxy()
+  if sendResponse
+    sendResponse null
+
   
       
       

@@ -35,7 +35,11 @@
     }
     return chrome.storage.local.set({
       fixed_servers: fixed_servers
-    }, function() {});
+    }, function() {
+      return chrome.extension.sendMessage({
+        id: "refresh"
+      }, function() {});
+    });
   };
 
   document.addEventListener('DOMContentLoaded', load_data);

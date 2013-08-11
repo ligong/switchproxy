@@ -47,9 +47,14 @@
     }
   };
 
-  switch_proxy = function() {
+  switch_proxy = function(action) {
     return chrome.storage.local.get(["enabled", "fixed_servers"], function(data) {
-      data.enabled = !data.enabled;
+      if (!("enabled" in data)) {
+        data.enabled = false;
+      }
+      if (action) {
+        data.enabled = !data.enabled;
+      }
       return proxy(data.enabled, data.fixed_servers, function(enabled) {
         data.enabled = enabled;
         return chrome.storage.local.set(data, function() {
@@ -75,5 +80,14 @@
   chrome.runtime.onInstalled.addListener(display_status);
 
   chrome.browserAction.onClicked.addListener(switch_proxy);
+
+  chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    if (request && (request.id === "refresh")) {
+      switch_proxy();
+    }
+    if (sendResponse) {
+      return sendResponse(null);
+    }
+  });
 
 }).call(this);

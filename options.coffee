@@ -18,6 +18,8 @@ save_data = () ->
   for k of fixed_servers
     fixed_servers[k] = document.querySelector('#'+k).value
   chrome.storage.local.set {fixed_servers},->
+    chrome.extension.sendMessage({id:"refresh"},->);
+
 
 
 document.addEventListener('DOMContentLoaded', load_data)
